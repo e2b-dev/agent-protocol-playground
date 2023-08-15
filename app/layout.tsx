@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { Separator } from '@/components/ui/separator'
 import { Inter } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -16,7 +17,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <main className="min-h-screen flex flex-col justify-start items-start">
+          {/* Header */}
+          <div className="w-full px-4 py-4">
+            <h1 className="font-bold text-lg">Agent Protocol Playground</h1>
+          </div>
+          <Separator/>
+          {children}
+        </main>
+      </body>
     </html>
   )
 }
