@@ -73,7 +73,10 @@ export default function Home() {
         <TableBody>
           {tasks.map((task) => (
             <TableRow key={task.task_id}>
-              <TableCell>{task.task_id}</TableCell>
+              <TableCell
+                onClick={() => router.push(`/task/${task.task_id}`)}
+                className=" font-medium cursor-pointer hover:bg-gray-100 transition-all"
+              >{task.task_id}</TableCell>
               <TableCell
                 onClick={() => router.push(`/task/${task.task_id}`)}
                 className=" font-medium cursor-pointer hover:bg-gray-100 transition-all"
