@@ -1,8 +1,6 @@
 'use client'
 import useSWR from 'swr'
 
-import { ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useAgentStore } from '@/app/store'
 import { components } from '@/app/types/api'
@@ -14,10 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import Step from '@/app/task/[taskID]/step'
 import { fetcher } from '@/app/utils'
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+import Artifact from '@/app/task/[taskID]/artifacts/artifact'
 
 export default function Page({ params }: { params: { taskID: string } }) {
   const { url } = useAgentStore()
@@ -30,31 +26,24 @@ export default function Page({ params }: { params: { taskID: string } }) {
     fetcher,
   )
   const {
-    data: steps,
-    mutate: refetchSteps,
-    error: stepsError,
-    isLoading: isStepsLoading,
-  } = useSWR<components['schemas']['Step'][]>(
-    `${url}/agent/tasks/${params.taskID}/steps`,
+    data: artifacts,
+    error: artifactsError,
+    isLoading: isArtifactsLoading,
+  } = useSWR<components['schemas']['Artifact'][]>(
+    `${url}/agent/tasks/${params.taskID}/artifacts`,
     fetcher,
   )
 
-  if (isStepsLoading || isTaskLoading) {
+  if (isArtifactsLoading || isTaskLoading) {
     return <div>Loading...</div>
   }
-
-  if (taskError || stepsError || task === undefined || steps === undefined) {
+  if (
+    taskError ||
+    artifactsError ||
+    task === undefined ||
+    artifacts === undefined
+  ) {
     return <div>Failed to load</div>
-  }
-
-  async function nextStep() {
-    const request = fetch(`${url}/agent/tasks/${params.taskID}/steps`, {
-      method: 'POST',
-    })
-    await sleep(50)
-    await refetchSteps()
-    await request
-    await refetchSteps()
   }
 
   return (
@@ -77,28 +66,22 @@ export default function Page({ params }: { params: { taskID: string } }) {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]">#</TableHead>
-            <TableHead className="w-[150px]">Step Name</TableHead>
-            <TableHead className="w-[100px]">Status</TableHead>
-            <TableHead>Output</TableHead>
+            <TableHead className="w-[150px]">File Name</TableHead>
+            <TableHead className="w-[100px]">Relative Path</TableHead>
+            <TableHead>Download</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {steps.map((step, idx) => (
-            <Step key={step.step_id} step={step} step_number={idx + 1} />
+          {artifacts.map((artifact, idx) => (
+            <Artifact
+              key={artifact.artifact_id}
+              taskId={task.task_id}
+              artifact={artifact}
+              artifact_number={idx + 1}
+            />
           ))}
         </TableBody>
       </Table>
-
-      <div className="sticky top-[100vh] px-4 py-2 w-full flex items-center justify-end space-x-2 bg-white border-2 rounded-l">
-        <Button
-          type="submit"
-          className="whitespace-nowrap px-3 h-8"
-          onClick={() => nextStep()}
-        >
-          Next Step
-          <ChevronRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
     </div>
   )
 }
