@@ -62,7 +62,7 @@ export default function Page({ params }: { params: { taskID: string } }) {
       </div>
 
       <Table>
-        <TableCaption>Steps</TableCaption>
+        <TableCaption>Artifacts</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]">#</TableHead>
