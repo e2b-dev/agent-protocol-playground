@@ -17,8 +17,6 @@ import {
 import Step from '@/app/task/[taskID]/step'
 import { fetcher } from '@/app/utils'
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-
 export default function Page({ params }: { params: { taskID: string } }) {
   const { url } = useAgentStore()
   const {
@@ -31,7 +29,7 @@ export default function Page({ params }: { params: { taskID: string } }) {
   )
   const {
     data: steps,
-    mutate: refetchSteps,
+    mutate: mutateSteps,
     error: stepsError,
     isLoading: isStepsLoading,
   } = useSWR<components['schemas']['Step'][]>(
@@ -51,10 +49,18 @@ export default function Page({ params }: { params: { taskID: string } }) {
     const request = fetch(`${url}/agent/tasks/${params.taskID}/steps`, {
       method: 'POST',
     })
-    await sleep(50)
-    await refetchSteps()
+
+    const currentStep = steps!.find((step) => step.status === 'created')
+    if (currentStep) {
+      const updatedSteps = steps!.map((item) =>
+        item.step_id === currentStep.step_id
+          ? { ...item, status: 'running' }
+          : item,
+      )
+      await mutateSteps(updatedSteps, false)
+    }
     await request
-    await refetchSteps()
+    await mutateSteps()
   }
 
   return (
